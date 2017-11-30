@@ -173,7 +173,7 @@ print_r($vectors);
 get the vector representation of sentence.
 
 ```php
-$sentence = 'It's fine day';
+$sentence = "It's fine day";
 
 $vectors = $ftext->getSentenceVectors($sentence);
 print_r($vectors);
