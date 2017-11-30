@@ -50,22 +50,22 @@ fastText {
 
 ## Table of Contents
 
-[fastText::__construct](#__construct)
-[fastText::load](#load)
-[fastText::getWordRows](#getWordRows)
-[fastText::getLabelRows](#getLabelRows)
-[fastText::getWordId](#getWordId)
-[fastText::getWord](#getWord)
-[fastText::getLabel](#getLabel)
-[fastText::getWordVectors](#getWordVectors)
-[fastText::getSentenceVectors](#getSentenceVectors)
-[fastText::getPredict](#getPredict)
-[fastText::getNN](#getNN)
-[fastText::getAnalogies](#getAnalogies)
-[fastText::getNgramVectors](#getNgramVectors)
-[fastText::lastErrorMsg](#lastErrorMsg)
-
-[return value format](#returnvalf)
+[fastText::__construct](#__construct)  
+[fastText::load](#load)  
+[fastText::getWordRows](#getWordRows)  
+[fastText::getLabelRows](#getLabelRows)  
+[fastText::getWordId](#getWordId)  
+[fastText::getWord](#getWord)  
+[fastText::getLabel](#getLabel)  
+[fastText::getWordVectors](#getWordVectors)  
+[fastText::getSentenceVectors](#getSentenceVectors)  
+[fastText::getPredict](#getPredict)  
+[fastText::getNN](#getNN)  
+[fastText::getAnalogies](#getAnalogies)  
+[fastText::getNgramVectors](#getNgramVectors)  
+[fastText::lastErrorMsg](#lastErrorMsg)  
+  
+[return value format](#returnvalf)  
 
 -----
 
