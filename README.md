@@ -6,8 +6,8 @@ fastText-php is a PHP bindings for fastText.
 
 ## Requirements
 
-PHP 7.x
-fastText shard object
+PHP 7.x  
+fastText shard object  
 
 ```
 $ git clone https://github.com/facebookresearch/fastText.git
