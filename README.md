@@ -27,6 +27,12 @@ $ make
 $ sudo make install
 ```
 
+edit your php.ini and add:
+
+```
+extension=fasttext.so
+```
+
 ## Class synopsis
 
 ```php
