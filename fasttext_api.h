@@ -32,6 +32,10 @@ extern "C" {
 #   endif /* defined(_WIN32) || defined(_WIN64) */
 #endif /* FASTTEXT_API */
 
+#ifndef FASTTEXT_VERSION
+#    define FASTTEXT_VERSION 12
+#endif /* FASTTEXT_VERSION */
+    
 #define FASTTEXT_TRUE           (1)
 #define FASTTEXT_FALSE          (0)
 
