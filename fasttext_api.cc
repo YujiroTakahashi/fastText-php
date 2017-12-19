@@ -235,9 +235,9 @@ FTVectors FastTextWordVectors(FastTextHandle handle, const char* word)
     Vector vec(fasttext->getDimension());
     fasttext->getWordVector(vec, text);
 
-    FTVectors retval = _newVectors(vec.m_);
+    FTVectors retval = _newVectors(vec.size());
     for (int64_t j = 0; j < retval->size; j++) {
-        retval->vals[j] = vec.data_[j];
+        retval->vals[j] = vec[j];
     }
     return retval;
 }
@@ -258,9 +258,9 @@ FTVectors FastTextSubwordVector(FastTextHandle handle, const char* word)
     Vector vec(fasttext->getDimension());
     fasttext->getSubwordVector(vec, text);
 
-    FTVectors retval = _newVectors(vec.m_);
+    FTVectors retval = _newVectors(vec.size());
     for (int64_t j = 0; j < retval->size; j++) {
-        retval->vals[j] = vec.data_[j];
+        retval->vals[j] = vec[j];
     }
     return retval;
 }
@@ -283,9 +283,9 @@ FTVectors FastTextSentenceVectors(FastTextHandle handle, const char* word)
     Vector svec(fasttext->getDimension());
     fasttext->getSentenceVector(ioss, svec);
 
-    FTVectors retval = _newVectors(svec.m_);
+    FTVectors retval = _newVectors(svec.size());
     for (int64_t j = 0; j < retval->size; j++) {
-        retval->vals[j] = svec.data_[j];
+        retval->vals[j] = svec[j];
     }
     return retval;
 }
@@ -305,7 +305,11 @@ FTProbs FastTextPredict(FastTextHandle handle, const char* word, const int k)
 
     std::string text = std::string(word);
     std::stringstream ioss;
-    std::copy(text.begin(), text.end(), std::ostream_iterator<char>(ioss));
+
+    if ('\n' != text.back()) {
+        text.push_back('\n');
+    }
+    ioss.str(text);
     std::vector<std::pair<fasttext::real, std::string>> predictions;
 
     try {
@@ -317,6 +321,7 @@ FTProbs FastTextPredict(FastTextHandle handle, const char* word, const int k)
     std::stringstream ss;
     for (auto n : predictions) {
         ss << n.second << " " << std::exp(n.first) << "\n";
+        std::cout << n.second << " " << std::exp(n.first) << std::endl;
     }
 
     return _parseString(ss.str().c_str(), true);
@@ -337,7 +342,8 @@ FTProbs FastTextNN(FastTextHandle handle, const char* word, const int k)
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
 
-    std::string queryWord = std::string(word);
+    std::string text = std::string(word);
+
     Vector queryVec(fasttext->getDimension());
     Matrix wordVectors(dict->nwords(), fasttext->getDimension());
 
@@ -348,8 +354,8 @@ FTProbs FastTextNN(FastTextHandle handle, const char* word, const int k)
 
     std::set<std::string> banSet;
     banSet.clear();
-    banSet.insert(queryWord);
-    fasttext->getWordVector(queryVec, queryWord);
+    banSet.insert(text);
+    fasttext->getWordVector(queryVec, text);
 
     buf.str("");
     prev = std::cout.rdbuf(&buf);
