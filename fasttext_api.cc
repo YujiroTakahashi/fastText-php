@@ -503,7 +503,7 @@ FTValues _errorValues(const char *error)
     val->buff = new char[val->len + 1];
     strcpy(val->buff, error);
 
-    val->vals = NULL;
+    val->vals = nullptr;
 
     return val;
 }
@@ -647,7 +647,7 @@ FTKeyValues _setKeyValues(std::vector<std::pair<fasttext::real, std::string>> &v
     val->len = 0;
     val->buff = nullptr;
 
-    val->size = (int)values.size();
+    val->size = static_cast<int>(values.size());
     val->labels = new char*[val->size];
     val->vals = new FTReal[val->size];
 
