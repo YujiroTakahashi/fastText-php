@@ -50,6 +50,19 @@ static void fasttext_value_add_array(zval *retval, int idx, const char *label, c
 }
 /* }}} */
 
+static void fasttext_key_value_add_array(zval *retval, int idx, const char *label, FTReal val) /* {{{ */
+{
+	zval tmp;
+	zend_string *str = zend_strpprintf(0, "%f", val);
+
+	array_init(&tmp);
+	add_assoc_string(&tmp, "label", (char *)label);
+	add_assoc_string(&tmp, "prob", (char *)ZSTR_VAL(str));
+
+	add_index_zval(retval, idx, &tmp);
+}
+/* }}} */
+
 
 /* {{{ proto void fasttext::__construct()
  */
@@ -307,7 +320,7 @@ PHP_METHOD(fasttext, getPredict)
 	char *word;
 	size_t word_len;
 	zend_long k = 10;
-	FTProbs ft_vals;
+	FTKeyValues ft_vals;
 
 	ft_obj = Z_FASTTEXT_P(object);
 
@@ -318,15 +331,15 @@ PHP_METHOD(fasttext, getPredict)
 
 	if (ft_vals->is_error) {
 		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextProbsFree(ft_vals);
+		FastTextKeyValuesFree(ft_vals);
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->probs[idx]);
+		fasttext_key_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->vals[idx]);
 	}
-	FastTextProbsFree(ft_vals);
+	FastTextKeyValuesFree(ft_vals);
 }
 /* }}} */
 
@@ -339,7 +352,7 @@ PHP_METHOD(fasttext, getNN)
 	char *word;
 	size_t word_len;
 	zend_long k = 10;
-	FTProbs ft_vals;
+	FTKeyValues ft_vals;
 
 	ft_obj = Z_FASTTEXT_P(object);
 
@@ -350,15 +363,15 @@ PHP_METHOD(fasttext, getNN)
 
 	if (ft_vals->is_error) {
 		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextProbsFree(ft_vals);
+		FastTextKeyValuesFree(ft_vals);
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->probs[idx]);
+		fasttext_key_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->vals[idx]);
 	}
-	FastTextProbsFree(ft_vals);
+	FastTextKeyValuesFree(ft_vals);
 }
 /* }}} */
 
@@ -371,7 +384,7 @@ PHP_METHOD(fasttext, getAnalogies)
 	char *word;
 	size_t word_len;
 	zend_long k = 10;
-	FTProbs ft_vals;
+	FTKeyValues ft_vals;
 
 	ft_obj = Z_FASTTEXT_P(object);
 
@@ -382,15 +395,15 @@ PHP_METHOD(fasttext, getAnalogies)
 
 	if (ft_vals->is_error) {
 		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextProbsFree(ft_vals);
+		FastTextKeyValuesFree(ft_vals);
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->probs[idx]);
+		fasttext_key_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->vals[idx]);
 	}
-	FastTextProbsFree(ft_vals);
+	FastTextKeyValuesFree(ft_vals);
 }
 /* }}} */
 

@@ -35,7 +35,7 @@ extern "C" {
 #ifndef FASTTEXT_VERSION
 #    define FASTTEXT_VERSION 12
 #endif /* FASTTEXT_VERSION */
-    
+
 #define FASTTEXT_TRUE           (1)
 #define FASTTEXT_FALSE          (0)
 
@@ -66,10 +66,20 @@ struct _FTProbs {
     char **probs;
 };
 
+struct _FTKeyValues {
+    int is_error;
+    size_t len;
+    char *buff;
+    int size;
+    char **labels;
+    FTReal *vals;
+};
+
 typedef void *FastTextHandle;
 typedef struct _FTValues *FTValues;
 typedef struct _FTVectors *FTVectors;
 typedef struct _FTProbs *FTProbs;
+typedef struct _FTKeyValues *FTKeyValues;
 
 FASTTEXT_API int FastTextVersion();
 FASTTEXT_API FastTextHandle FastTextCreate();
@@ -77,6 +87,7 @@ FASTTEXT_API void FastTextFree(FastTextHandle handle);
 FASTTEXT_API void FastTextValuesFree(FTValues handle);
 FASTTEXT_API void FastTextVectorsFree(FTVectors handle);
 FASTTEXT_API void FastTextProbsFree(FTProbs handle);
+FASTTEXT_API void FastTextKeyValuesFree(FTKeyValues handle);
 
 FASTTEXT_API int FastTextLoadModel(FastTextHandle handle, const char *filename);
 FASTTEXT_API int32_t FastTextWordRows(FastTextHandle handle);
@@ -88,9 +99,9 @@ FASTTEXT_API FTValues FastTextGetLabel(FastTextHandle handle, int32_t labelId);
 FASTTEXT_API FTVectors FastTextWordVectors(FastTextHandle handle, const char* word);
 FASTTEXT_API FTVectors FastTextSubwordVector(FastTextHandle handle, const char* word);
 FASTTEXT_API FTVectors FastTextSentenceVectors(FastTextHandle handle, const char* sentence);
-FASTTEXT_API FTProbs FastTextPredict(FastTextHandle handle, const char* word, const int k);
-FASTTEXT_API FTProbs FastTextNN(FastTextHandle handle, const char* word, const int k);
-FASTTEXT_API FTProbs FastTextAnalogies(FastTextHandle handle, const char* word, const int k);
+FASTTEXT_API FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k);
+FASTTEXT_API FTKeyValues FastTextNN(FastTextHandle handle, const char* word, const int k);
+FASTTEXT_API FTKeyValues FastTextAnalogies(FastTextHandle handle, const char* word, const int k);
 FASTTEXT_API FTProbs FastTextNgramVectors(FastTextHandle handle, const char* word);
 
 #ifdef __cplusplus

@@ -19,6 +19,8 @@ FTVectors _newVectors(int64_t size);
 FTVectors _errorVectors(const char *error);
 FTProbs _parseString(const char *buff, bool isSingle);
 FTProbs _errorProbs(const char *error);
+FTKeyValues _setKeyValues(std::vector<std::pair<fasttext::real, std::string>> &values);
+FTKeyValues _errorKeyValues(const char *error);
 std::vector<std::pair<int, std::string>> _parseQuery(std::string query);
 
 /**
@@ -65,10 +67,12 @@ void FastTextFree(FastTextHandle handle)
  */
 void FastTextValuesFree(FTValues handle)
 {
-    if (NULL != handle->vals) {
+    if (nullptr != handle->buff) {
+        delete[] handle->buff;
+    }
+    if (nullptr != handle->vals) {
         delete[] handle->vals;
     }
-    delete[] handle->buff;
     delete handle;
 }
 
@@ -81,7 +85,12 @@ void FastTextValuesFree(FTValues handle)
  */
 void FastTextVectorsFree(FTVectors handle)
 {
-    delete[] handle->vals;
+    if (nullptr != handle->buff) {
+        delete[] handle->buff;
+    }
+    if (nullptr != handle->vals) {
+        delete[] handle->vals;
+    }
     delete handle;
 }
 
@@ -94,13 +103,36 @@ void FastTextVectorsFree(FTVectors handle)
  */
 void FastTextProbsFree(FTProbs handle)
 {
-    if (NULL != handle->probs) {
+    if (nullptr != handle->probs) {
         delete[] handle->probs;
     }
-    if (NULL != handle->labels) {
+    if (nullptr != handle->labels) {
         delete[] handle->labels;
     }
-    delete[] handle->buff;
+    if (nullptr != handle->buff) {
+        delete[] handle->buff;
+    }
+    delete handle;
+}
+
+/**
+ * free a FTKeyValues handle
+ *
+ * @access public
+ * @param  FTKeyValues ptr
+ * @return void
+ */
+void FastTextKeyValuesFree(FTKeyValues handle)
+{
+    if (nullptr != handle->labels) {
+        delete[] handle->labels;
+    }
+    if (nullptr != handle->vals) {
+        delete[] handle->vals;
+    }
+    if (nullptr != handle->buff) {
+        delete[] handle->buff;
+    }
     delete handle;
 }
 
@@ -297,9 +329,9 @@ FTVectors FastTextSentenceVectors(FastTextHandle handle, const char* word)
  * @param  FastTextHandle handle
  * @param  const char* word
  * @param  const int k
- * @return FTProbs
+ * @return FTKeyValues
  */
-FTProbs FastTextPredict(FastTextHandle handle, const char* word, const int k)
+FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
 
@@ -310,21 +342,17 @@ FTProbs FastTextPredict(FastTextHandle handle, const char* word, const int k)
         text.push_back('\n');
     }
     ioss.str(text);
-    std::vector<std::pair<fasttext::real, std::string>> predictions;
 
+    FTKeyValues retval;
+    std::vector<std::pair<fasttext::real, std::string>> results;
     try {
-        fasttext->predict(ioss, k, predictions);
+        fasttext->predict(ioss, k, results);
+        retval = _setKeyValues(results);
     } catch (const std::invalid_argument& e) {
-        return _errorProbs(e.what());
+        retval = _errorKeyValues(e.what());
     }
 
-    std::stringstream ss;
-    for (auto n : predictions) {
-        ss << n.second << " " << std::exp(n.first) << "\n";
-        std::cout << n.second << " " << std::exp(n.first) << std::endl;
-    }
-
-    return _parseString(ss.str().c_str(), true);
+    return retval;
 }
 
 /**
@@ -334,11 +362,10 @@ FTProbs FastTextPredict(FastTextHandle handle, const char* word, const int k)
  * @param  FastTextHandle handle
  * @param  const char* word
  * @param  const int k
- * @return FTVectors
+ * @return FTKeyValues
  */
-FTProbs FastTextNN(FastTextHandle handle, const char* word, const int k)
+FTKeyValues FastTextNN(FastTextHandle handle, const char* word, const int k)
 {
-    FTProbs retval;
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
 
@@ -347,26 +374,21 @@ FTProbs FastTextNN(FastTextHandle handle, const char* word, const int k)
     Vector queryVec(fasttext->getDimension());
     Matrix wordVectors(dict->nwords(), fasttext->getDimension());
 
-    std::stringbuf buf;
-    std::streambuf *prev = std::cerr.rdbuf(&buf);
     fasttext->precomputeWordVectors(wordVectors);
-    std::cerr.rdbuf(prev);
 
     std::set<std::string> banSet;
     banSet.clear();
     banSet.insert(text);
     fasttext->getWordVector(queryVec, text);
 
-    buf.str("");
-    prev = std::cout.rdbuf(&buf);
-
+    FTKeyValues retval;
+    std::vector<std::pair<fasttext::real, std::string>> results;
     try {
-        fasttext->findNN(wordVectors, queryVec, k, banSet);
-        retval = _parseString(buf.str().c_str(), true);
+        fasttext->findNN(wordVectors, queryVec, k, banSet, results);
+        retval = _setKeyValues(results);
     } catch (const std::invalid_argument& e) {
-        retval = _errorProbs(e.what());
+        retval = _errorKeyValues(e.what());
     }
-    std::cout.rdbuf(prev);
 
     return retval;
 }
@@ -378,11 +400,10 @@ FTProbs FastTextNN(FastTextHandle handle, const char* word, const int k)
  * @param  FastTextHandle handle
  * @param  const char* word
  * @param  const int k
- * @return FTVectors
+ * @return FTKeyValues
  */
-FTProbs FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
+FTKeyValues FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
 {
-    FTProbs retval;
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
 
@@ -405,16 +426,14 @@ FTProbs FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
         query.addVector(buffer, 1.0 * n.first);
     }
 
-    buf.str("");
-    prev = std::cout.rdbuf(&buf);
-
+    FTKeyValues retval;
+    std::vector<std::pair<fasttext::real, std::string>> results;
     try {
-        fasttext->findNN(wordVectors, query, k, banSet);
-        retval = _parseString(buf.str().c_str(), true);
+        fasttext->findNN(wordVectors, query, k, banSet, results);
+        retval = _setKeyValues(results);
     } catch (const std::invalid_argument& e) {
-        retval = _errorProbs(e.what());
+        retval = _errorKeyValues(e.what());
     }
-    std::cout.rdbuf(prev);
 
     return retval;
 }
@@ -463,7 +482,7 @@ FTValues _newValues(std::string word)
     strcpy(val->buff, word.c_str());
 
     val->size = 1;
-    val->vals = NULL;
+    val->vals = nullptr;
 
     return val;
 }
@@ -501,7 +520,7 @@ FTVectors _newVectors(int64_t size)
     FTVectors val = new struct _FTVectors;
     val->is_error = FASTTEXT_FALSE;
     val->len = 0;
-    val->buff = NULL;
+    val->buff = nullptr;
 
     val->size = size;
     val->vals = new FTReal[val->size];
@@ -524,7 +543,7 @@ FTVectors _errorVectors(const char *error)
     val->buff = new char[val->len + 1];
     strcpy(val->buff, error);
 
-    val->vals = NULL;
+    val->vals = nullptr;
 
     return val;
 }
@@ -608,8 +627,57 @@ FTProbs _errorProbs(const char *error)
     val->buff = new char[val->len + 1];
     strcpy(val->buff, error);
 
-    val->probs = NULL;
-    val->labels = NULL;
+    val->probs = nullptr;
+    val->labels = nullptr;
+
+    return val;
+}
+
+/**
+ * create struct FTKeyValues
+ *
+ * @access private
+ * @param  int64_t size
+ * @return FTKeyValues
+ */
+FTKeyValues _setKeyValues(std::vector<std::pair<fasttext::real, std::string>> &values)
+{
+    FTKeyValues val = new struct _FTKeyValues;
+    val->is_error = FASTTEXT_FALSE;
+    val->len = 0;
+    val->buff = nullptr;
+
+    val->size = (int)values.size();
+    val->labels = new char*[val->size];
+    val->vals = new FTReal[val->size];
+
+    int idx=0;
+    for (auto &value : values) {
+        val->labels[idx] = new char[value.second.length() + 1];
+        val->vals[idx] = std::exp(value.first);
+        strcpy(val->labels[idx], value.second.c_str());
+        idx++;
+    }
+
+    return val;
+}
+
+/**
+ * set error message
+ *
+ * @access private
+ * @param  const char* error
+ * @return FTVectors
+ */
+FTKeyValues _errorKeyValues(const char *error)
+{
+    FTKeyValues val = new struct _FTKeyValues;
+    val->is_error = FASTTEXT_TRUE;
+    val->len = strlen(error);
+    val->buff = new char[val->len + 1];
+    strcpy(val->buff, error);
+
+    val->vals = nullptr;
 
     return val;
 }
