@@ -573,7 +573,6 @@ PHP_MINFO_FUNCTION(fasttext)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "fastText support", "enabled");
 	php_info_print_table_row(2, "fastText module version", PHP_FASTTEXT_VERSION);
-	php_info_print_table_row(2, "fastText Library", FastTextVersion());
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
