@@ -334,6 +334,7 @@ FTVectors FastTextSentenceVectors(FastTextHandle handle, const char* word)
 FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
+    std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
 
     std::string text = std::string(word);
     std::stringstream ioss;
@@ -344,9 +345,18 @@ FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k
     ioss.str(text);
 
     FTKeyValues retval;
+    std::vector<int32_t> words, labels;
+    std::vector<std::pair<real, int32_t>> predictions;
     std::vector<std::pair<fasttext::real, std::string>> results;
+
     try {
-        fasttext->predict(ioss, k, results);
+        dict->getLine(ioss, words, labels);
+        fasttext->predict(k, words, predictions);
+        for (auto &p : predictions) {
+            results.push_back(
+                std::make_pair(p.first, dict->getLabel(p.second))
+            );
+        }
         retval = _setKeyValues(results);
     } catch (const std::invalid_argument& e) {
         retval = _errorKeyValues(e.what());
@@ -420,7 +430,7 @@ FTKeyValues FastTextAnalogies(FastTextHandle handle, const char* word, const int
     query.zero();
 
     std::vector<std::pair<int, std::string>> queries = _parseQuery(std::string(word));
-    for (auto n : queries) {
+    for (auto &n : queries) {
         banSet.insert(n.second);
         fasttext->getWordVector(buffer, n.second);
         query.addVector(buffer, 1.0 * n.first);
