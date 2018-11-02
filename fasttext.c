@@ -522,7 +522,8 @@ static zend_object *php_fasttext_object_new(zend_class_entry *class_type) /* {{{
 	php_fasttext_object *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_fasttext_object) + zend_object_properties_size(class_type));
+	int ftxtsize = FastTextSize();
+	intern = ecalloc(1, sizeof(php_fasttext_object) + zend_object_properties_size(class_type) + ftxtsize);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);

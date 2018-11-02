@@ -82,6 +82,7 @@ typedef struct _FTProbs *FTProbs;
 typedef struct _FTKeyValues *FTKeyValues;
 
 FASTTEXT_API int FastTextVersion();
+FASTTEXT_API int FastTextSize();
 FASTTEXT_API FastTextHandle FastTextCreate();
 FASTTEXT_API void FastTextFree(FastTextHandle handle);
 FASTTEXT_API void FastTextValuesFree(FTValues handle);

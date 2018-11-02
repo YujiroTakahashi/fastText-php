@@ -35,6 +35,17 @@ int FastTextVersion()
 }
 
 /**
+ * get fastText size
+ *
+ * @access public
+ * @return int
+ */
+int FastTextSize()
+{
+    return sizeof(FastText);
+}
+
+/**
  * create a FastText handle
  *
  * @access public
