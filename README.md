@@ -58,18 +58,18 @@ fastText {
 
 [fastText::__construct](#__construct)  
 [fastText::load](#load)  
-[fastText::getWordRows](#getWordRows)  
-[fastText::getLabelRows](#getLabelRows)  
-[fastText::getWordId](#getWordId)  
-[fastText::getWord](#getWord)  
-[fastText::getLabel](#getLabel)  
-[fastText::getWordVectors](#getWordVectors)  
-[fastText::getSentenceVectors](#getSentenceVectors)  
-[fastText::getPredict](#getPredict)  
-[fastText::getNN](#getNN)  
-[fastText::getAnalogies](#getAnalogies)  
-[fastText::getNgramVectors](#getNgramVectors)  
-[fastText::lastErrorMsg](#lastErrorMsg)  
+[fastText::getWordRows](#getwordrows)  
+[fastText::getLabelRows](#getlabelrows)  
+[fastText::getWordId](#getworded)  
+[fastText::getWord](#getword)  
+[fastText::getLabel](#getlabel)  
+[fastText::getWordVectors](#getwordvectors)  
+[fastText::getSentenceVectors](#getsentenceVectors)  
+[fastText::getPredict](#getpredict)  
+[fastText::getNN](#getnn)  
+[fastText::getAnalogies](#getanalogies)  
+[fastText::getNgramVectors](#getngramvectors)  
+[fastText::lastErrorMsg](#lastErrormsg)  
   
 [return value format](#returnvalf)  
 
@@ -96,7 +96,7 @@ $ftext->load($model);
 
 -----
 
-### <a name="getWordRows">int fastText::getWordRows()
+### <a name="getwordrows">int fastText::getWordRows()
 
 get the number of vocabularies.
 
@@ -110,7 +110,7 @@ for ($idx = 0; $idx < $rows; $idx++) {
 
 -----
 
-### <a name="getLabelRows">int fastText::getLabelRows()
+### <a name="getlabelrows">int fastText::getLabelRows()
 
 get the number of labels.
 
@@ -124,7 +124,7 @@ for ($idx = 0; $idx < $rows; $idx++) {
 
 -----
 
-### <a name="getWordId">int fastText::getWordId(string word)
+### <a name="getwordid">int fastText::getWordId(string word)
 
 get the word ID within the dictionary.
 
@@ -135,7 +135,7 @@ $rowId = $ftext->getWordId($word);
 
 -----
 
-### <a name="getWord">string fastText::getWord(int word_id)
+### <a name="getword">string fastText::getWord(int word_id)
 
 converts a ID into a word.
 
@@ -149,7 +149,7 @@ for ($idx = 0; $idx < $rows; $idx++) {
 
 -----
 
-### <a name="getLabel">string fastText::getLabel(int label_id)
+### <a name="getlabel">string fastText::getLabel(int label_id)
 
 converts a ID into a label.
 
@@ -163,7 +163,7 @@ for ($idx = 0; $idx < $rows; $idx++) {
 
 -----
 
-### <a name="getWordVectors">array fastText::getWordVectors(string word)
+### <a name="getwordvectors">array fastText::getWordVectors(string word)
 
 get the vector representation of word.
 
@@ -174,7 +174,7 @@ print_r($vectors);
 
 -----
 
-### <a name="getSentenceVectors">array fastText::getSentenceVectors(string sentence)
+### <a name="getsentencevectors">array fastText::getSentenceVectors(string sentence)
 
 get the vector representation of sentence.
 
@@ -187,7 +187,7 @@ print_r($vectors);
 
 -----
 
-### <a name="getPredict">fastText::getPredict
+### <a name="getpredict">fastText::getPredict
 * array fastText::getPredict(string word)
 * FALSE fastText::getPredict(string word)
 
@@ -202,7 +202,7 @@ foreach ($probs as $row) {
 
 -----
 
-### <a name="getNN">fastText::getNN
+### <a name="getnn">fastText::getNN
 * array fastText::getNN(string word)
 * FALSE fastText::getNN(string word)
 
@@ -217,7 +217,7 @@ foreach ($probs as $row) {
 
 -----
 
-### <a name="getAnalogies">fastText::getAnalogies
+### <a name="getanalogies">fastText::getAnalogies
 * array fastText::getAnalogies(string word)
 * FALSE fastText::getAnalogies(string word)
 
@@ -232,7 +232,7 @@ foreach ($probs as $row) {
 
 -----
 
-### <a name="getNgramVectors">fastText::getNgramVectors
+### <a name="getngramvectors">fastText::getNgramVectors
 * array fastText::getNgramVectors(string word)
 * FALSE fastText::getNgramVectors(string word)
 
@@ -245,7 +245,7 @@ print_r($res);
 
 -----
 
-### <a name="lastErrorMsg">string fastText::lastErrorMsg()
+### <a name="lasterrormsg">string fastText::lastErrorMsg()
 
 get the latest error message.
 
