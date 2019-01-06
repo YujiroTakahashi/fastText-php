@@ -50,7 +50,6 @@ fastText {
     public mixed getNN ( streing word [, int k] )
     public mixed getAnalogies ( streing word [, int k] )
     public mixed getNgramVectors ( streing word )
-    public string lastErrorMsg ( void )
 }
 ```
 
@@ -69,7 +68,6 @@ fastText {
 [fastText::getNN](#getnn)  
 [fastText::getAnalogies](#getanalogies)  
 [fastText::getNgramVectors](#getngramvectors)  
-[fastText::lastErrorMsg](#lastErrormsg)  
   
 [return value format](#returnvalf)  
 
@@ -245,19 +243,6 @@ print_r($res);
 
 -----
 
-### <a name="lasterrormsg">string fastText::lastErrorMsg()
-
-get the latest error message.
-
-```php
-$probs = $ftext->getNN('Tokyo');
-if (FALSE === $probs) {
-    echo $ftext->lastErrorMsg();
-}
-print_r($probs);
-```
-
------
 
 ## <a name="returnvalf">return value format
 
