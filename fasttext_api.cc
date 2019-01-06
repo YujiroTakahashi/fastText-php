@@ -9,18 +9,11 @@
 #include <fasttext/args.h>
 #include <fasttext/fasttext.h>
 
+#include "json.hpp"
 #include "fasttext_api.h"
 
 using namespace fasttext;
 
-FTValues _newValues(std::string word);
-FTValues _errorValues(const char *error);
-FTVectors _newVectors(int64_t size);
-FTVectors _errorVectors(const char *error);
-FTProbs _parseString(const char *buff, bool isSingle);
-FTProbs _errorProbs(const char *error);
-FTKeyValues _setKeyValues(std::vector<std::pair<fasttext::real, std::string>> &values);
-FTKeyValues _errorKeyValues(const char *error);
 std::vector<std::pair<int, std::string>> _parseQuery(std::string query);
 
 /**
@@ -70,81 +63,21 @@ void FastTextFree(FastTextHandle handle)
 }
 
 /**
- * free a FTValues handle
+ * free a FTStr handle
  *
  * @access public
- * @param  FastTextHandle handle
+ * @param  FTStr handle
  * @return void
  */
-void FastTextValuesFree(FTValues handle)
+void FastTextStrFree(FTStr handle)
 {
     if (nullptr != handle->buff) {
         delete[] handle->buff;
     }
-    if (nullptr != handle->vals) {
-        delete[] handle->vals;
-    }
-    delete handle;
-}
 
-/**
- * free a FTProbs handle
- *
- * @access public
- * @param  FTVectors handle
- * @return void
- */
-void FastTextVectorsFree(FTVectors handle)
-{
-    if (nullptr != handle->buff) {
-        delete[] handle->buff;
+    if (nullptr != handle) {
+        delete handle;
     }
-    if (nullptr != handle->vals) {
-        delete[] handle->vals;
-    }
-    delete handle;
-}
-
-/**
- * free a FTProbs handle
- *
- * @access public
- * @param  FTPredicts ptr
- * @return void
- */
-void FastTextProbsFree(FTProbs handle)
-{
-    if (nullptr != handle->probs) {
-        delete[] handle->probs;
-    }
-    if (nullptr != handle->labels) {
-        delete[] handle->labels;
-    }
-    if (nullptr != handle->buff) {
-        delete[] handle->buff;
-    }
-    delete handle;
-}
-
-/**
- * free a FTKeyValues handle
- *
- * @access public
- * @param  FTKeyValues ptr
- * @return void
- */
-void FastTextKeyValuesFree(FTKeyValues handle)
-{
-    if (nullptr != handle->labels) {
-        delete[] handle->labels;
-    }
-    if (nullptr != handle->vals) {
-        delete[] handle->vals;
-    }
-    if (nullptr != handle->buff) {
-        delete[] handle->buff;
-    }
-    delete handle;
 }
 
 /**
@@ -234,15 +167,15 @@ int32_t FastTextSubwordId(FastTextHandle handle, const char* word)
  * @access public
  * @param  FastTextHandle handle
  * @param  conint32_tst wordId
- * @return FTValues
+ * @return FTStr
  */
-FTValues FastTextGetWord(FastTextHandle handle, int32_t wordId)
+FTStr FastTextGetWord(FastTextHandle handle, int32_t wordId)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
     std::string word = dict->getWord(wordId);
 
-    return _newValues(word);
+    return FTStrVal(word);
 }
 
 /**
@@ -251,86 +184,15 @@ FTValues FastTextGetWord(FastTextHandle handle, int32_t wordId)
  * @access public
  * @param  FastTextHandle handle
  * @param  conint32_tst wordId
- * @return FTValues
+ * @return FTStr
  */
-FTValues FastTextGetLabel(FastTextHandle handle, int32_t labelId)
+FTStr FastTextGetLabel(FastTextHandle handle, int32_t labelId)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
     std::string label = dict->getLabel(labelId);
 
-    return _newValues(label);
-}
-
-/**
- * main.cc::printWordVectors
- *
- * @access public
- * @param  FastTextHandle handle
- * @param  const char* word
- * @return FTPredicts*
- */
-FTVectors FastTextWordVectors(FastTextHandle handle, const char* word)
-{
-    FastText *fasttext = static_cast<FastText*>(handle);
-    std::string text = std::string(word);
-
-    Vector vec(fasttext->getDimension());
-    fasttext->getWordVector(vec, text);
-
-    FTVectors retval = _newVectors(vec.size());
-    for (int64_t j = 0; j < retval->size; j++) {
-        retval->vals[j] = vec[j];
-    }
-    return retval;
-}
-
-/**
- * main.cc::printWordVectors
- *
- * @access public
- * @param  FastTextHandle handle
- * @param  const char* word
- * @return FTPredicts*
- */
-FTVectors FastTextSubwordVector(FastTextHandle handle, const char* word)
-{
-    FastText *fasttext = static_cast<FastText*>(handle);
-    std::string text = std::string(word);
-
-    Vector vec(fasttext->getDimension());
-    fasttext->getSubwordVector(vec, text);
-
-    FTVectors retval = _newVectors(vec.size());
-    for (int64_t j = 0; j < retval->size; j++) {
-        retval->vals[j] = vec[j];
-    }
-    return retval;
-}
-
-/**
- * main.cc::printSentenceVectors
- *
- * @access public
- * @param  FastTextHandle handle
- * @param  const char* word
- * @return FTVectors
- */
-FTVectors FastTextSentenceVectors(FastTextHandle handle, const char* word)
-{
-    FastText *fasttext = static_cast<FastText*>(handle);
-    std::string text = std::string(word);
-    std::stringstream ioss;
-    std::copy(text.begin(), text.end(), std::ostream_iterator<char>(ioss));
-
-    Vector svec(fasttext->getDimension());
-    fasttext->getSentenceVector(ioss, svec);
-
-    FTVectors retval = _newVectors(svec.size());
-    for (int64_t j = 0; j < retval->size; j++) {
-        retval->vals[j] = svec[j];
-    }
-    return retval;
+    return FTStrVal(label);
 }
 
 /**
@@ -340,9 +202,9 @@ FTVectors FastTextSentenceVectors(FastTextHandle handle, const char* word)
  * @param  FastTextHandle handle
  * @param  const char* word
  * @param  const int k
- * @return FTKeyValues
+ * @return FTStr
  */
-FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k)
+FTStr FastTextPredict(FastTextHandle handle, const char* word, const int k)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
@@ -355,25 +217,101 @@ FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k
     }
     ioss.str(text);
 
-    FTKeyValues retval;
+    nlohmann::json retj;
     std::vector<int32_t> words, labels;
     std::vector<std::pair<real, int32_t>> predictions;
     std::vector<std::pair<fasttext::real, std::string>> results;
+    real threshold = 0.0;
 
     try {
         dict->getLine(ioss, words, labels);
-        fasttext->predict(k, words, predictions);
+        fasttext->predict(k, words, predictions, threshold);
+        int idx = 0;
         for (auto &p : predictions) {
-            results.push_back(
-                std::make_pair(p.first, dict->getLabel(p.second))
-            );
+            retj[idx]["prob"] = std::exp(p.first);
+            retj[idx]["label"] = dict->getLabel(p.second);
+            idx++;
         }
-        retval = _setKeyValues(results);
     } catch (const std::invalid_argument& e) {
-        retval = _errorKeyValues(e.what());
+        retj["is_error"] = FASTTEXT_TRUE;
+        retj["error"] = e.what();
     }
 
-    return retval;
+    return FTStrVal(retj.dump());
+}
+
+/**
+ * main.cc::printWordVectors
+ *
+ * @access public
+ * @param  FastTextHandle handle
+ * @param  const char* word
+ * @return FTStr
+ */
+FTStr FastTextWordVectors(FastTextHandle handle, const char* word)
+{
+    FastText *fasttext = static_cast<FastText*>(handle);
+    std::string text = std::string(word);
+
+    Vector vec(fasttext->getDimension());
+    fasttext->getWordVector(vec, text);
+
+    nlohmann::json retj;
+    for (int64_t idx = 0; idx < vec.size(); idx++) {
+        retj[idx] = vec[idx];
+    }
+
+    return FTStrVal(retj.dump());
+}
+
+/**
+ * main.cc::printWordVectors
+ *
+ * @access public
+ * @param  FastTextHandle handle
+ * @param  const char* word
+ * @return FTStr
+ */
+FTStr FastTextSubwordVector(FastTextHandle handle, const char* word)
+{
+    FastText *fasttext = static_cast<FastText*>(handle);
+    std::string text = std::string(word);
+
+    Vector vec(fasttext->getDimension());
+    fasttext->getSubwordVector(vec, text);
+
+    nlohmann::json retj;
+    for (int64_t idx = 0; idx < vec.size(); idx++) {
+        retj[idx] = vec[idx];
+    }
+
+    return FTStrVal(retj.dump());
+}
+
+/**
+ * main.cc::printSentenceVectors
+ *
+ * @access public
+ * @param  FastTextHandle handle
+ * @param  const char* word
+ * @return FTStr
+ */
+FTStr FastTextSentenceVectors(FastTextHandle handle, const char* word)
+{
+    FastText *fasttext = static_cast<FastText*>(handle);
+    std::string text = std::string(word);
+    std::stringstream ioss;
+    std::copy(text.begin(), text.end(), std::ostream_iterator<char>(ioss));
+
+    Vector vec(fasttext->getDimension());
+    fasttext->getSentenceVector(ioss, vec);
+
+    nlohmann::json retj;
+    for (int64_t idx = 0; idx < vec.size(); idx++) {
+        retj[idx] = vec[idx];
+    }
+
+    return FTStrVal(retj.dump());
 }
 
 /**
@@ -383,9 +321,9 @@ FTKeyValues FastTextPredict(FastTextHandle handle, const char* word, const int k
  * @param  FastTextHandle handle
  * @param  const char* word
  * @param  const int k
- * @return FTKeyValues
+ * @return FTStr
  */
-FTKeyValues FastTextNN(FastTextHandle handle, const char* word, const int k)
+FTStr FastTextNN(FastTextHandle handle, const char* word, const int k)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
@@ -402,16 +340,22 @@ FTKeyValues FastTextNN(FastTextHandle handle, const char* word, const int k)
     banSet.insert(text);
     fasttext->getWordVector(queryVec, text);
 
-    FTKeyValues retval;
+    nlohmann::json retj;
     std::vector<std::pair<fasttext::real, std::string>> results;
     try {
         fasttext->findNN(wordVectors, queryVec, k, banSet, results);
-        retval = _setKeyValues(results);
+        int idx = 0;
+        for (auto &value : results) {
+            retj[idx]["prob"] = std::exp(value.first);
+            retj[idx]["label"] = value.second;
+            idx++;
+        }
     } catch (const std::invalid_argument& e) {
-        retval = _errorKeyValues(e.what());
+        retj["is_error"] = FASTTEXT_TRUE;
+        retj["error"] = e.what();
     }
 
-    return retval;
+    return FTStrVal(retj.dump());
 }
 
 /**
@@ -421,9 +365,9 @@ FTKeyValues FastTextNN(FastTextHandle handle, const char* word, const int k)
  * @param  FastTextHandle handle
  * @param  const char* word
  * @param  const int k
- * @return FTKeyValues
+ * @return FTStr
  */
-FTKeyValues FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
+FTStr FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
@@ -447,16 +391,21 @@ FTKeyValues FastTextAnalogies(FastTextHandle handle, const char* word, const int
         query.addVector(buffer, 1.0 * n.first);
     }
 
-    FTKeyValues retval;
+    nlohmann::json retj;
     std::vector<std::pair<fasttext::real, std::string>> results;
     try {
         fasttext->findNN(wordVectors, query, k, banSet, results);
-        retval = _setKeyValues(results);
+        int idx = 0;
+        for (auto &value : results) {
+            retj[idx]["prob"] = std::exp(value.first);
+            retj[idx]["label"] = value.second;
+            idx++;
+        }
     } catch (const std::invalid_argument& e) {
-        retval = _errorKeyValues(e.what());
+        retj["is_error"] = FASTTEXT_TRUE;
+        retj["error"] = e.what();
     }
-
-    return retval;
+    return FTStrVal(retj.dump());
 }
 
 /**
@@ -465,242 +414,31 @@ FTKeyValues FastTextAnalogies(FastTextHandle handle, const char* word, const int
  * @access public
  * @param  FastTextHandle handle
  * @param  const char* word
- * @return FTProbs
+ * @return FTStr
  */
-FTProbs FastTextNgramVectors(FastTextHandle handle, const char* word)
+FTStr FastTextNgramVectors(FastTextHandle handle, const char* word)
 {
-    FTProbs retval;
     FastText *fasttext = static_cast<FastText*>(handle);
-
-    std::stringbuf buf;
-    std::streambuf *prev = std::cout.rdbuf(&buf);
+    std::vector<std::pair<std::string, Vector>> ngramVectors;
+    nlohmann::json retj;
 
     try {
-        fasttext->ngramVectors(std::string(word));
-        retval = _parseString(buf.str().c_str(), false);
-    } catch (const std::invalid_argument& e) {
-        retval = _errorProbs(e.what());
-    }
-    std::cout.rdbuf(prev);
+        ngramVectors = fasttext->getNgramVectors(std::string(word));
 
-    return retval;
-}
-
-/**
- * create struct _FTValues
- *
- * @access private
- * @param  std::string word
- * @return FTValues
- */
-FTValues _newValues(std::string word)
-{
-    FTValues val = new struct _FTValues;
-
-    val->is_error = FASTTEXT_FALSE;
-    val->len = word.length();
-    val->buff = new char[val->len + 1];
-    strcpy(val->buff, word.c_str());
-
-    val->size = 1;
-    val->vals = nullptr;
-
-    return val;
-}
-
-/**
- * set error message
- *
- * @access private
- * @param  const char* error
- * @return FTValues
- */
-FTValues _errorValues(const char *error)
-{
-    FTValues val = new struct _FTValues;
-
-    val->is_error = FASTTEXT_TRUE;
-    val->len = strlen(error);
-    val->buff = new char[val->len + 1];
-    strcpy(val->buff, error);
-
-    val->vals = nullptr;
-
-    return val;
-}
-
-/**
- * create struct _FTVectors
- *
- * @access private
- * @param  int64_t size
- * @return FTVectors
- */
-FTVectors _newVectors(int64_t size)
-{
-    FTVectors val = new struct _FTVectors;
-    val->is_error = FASTTEXT_FALSE;
-    val->len = 0;
-    val->buff = nullptr;
-
-    val->size = size;
-    val->vals = new FTReal[val->size];
-
-    return val;
-}
-
-/**
- * set error message
- *
- * @access private
- * @param  const char* error
- * @return FTVectors
- */
-FTVectors _errorVectors(const char *error)
-{
-    FTVectors val = new struct _FTVectors;
-    val->is_error = FASTTEXT_TRUE;
-    val->len = strlen(error);
-    val->buff = new char[val->len + 1];
-    strcpy(val->buff, error);
-
-    val->vals = nullptr;
-
-    return val;
-}
-
-/**
- * count line breaks
- *
- * @access private
- * @param  FTProbs vals
- * @return FTVectors
- */
-int _countLine(FTProbs vals)
-{
-    int count = 0;
-    for (size_t idx=0; idx < vals->len; idx++) {
-        count = (vals->buff[idx] == '\n')? count + 1 : count;
-    } // for (size_t idx=0; idx < len; idx++)
-
-    return (count == 0) ? 1 : count;
-}
-
-/**
- * parse a output format
- *
- * @access private
- * @param  const char* word
- * @param  bool isSingle
- * @return FTVectors
- */
-FTProbs _parseString(const char *buff, bool isSingle)
-{
-    FTProbs val = new struct _FTProbs;
-    val->is_error = FASTTEXT_FALSE;
-    val->len = strlen(buff);
-    val->buff = new char[val->len + 1];
-    strcpy(val->buff, buff);
-
-    val->size = _countLine(val);
-    val->probs = new char*[val->size];
-    val->labels = new char*[val->size];
-
-    int curr = 0;
-    val->labels[curr] = val->buff;
-    bool separator = true;
-
-    for (size_t idx=0; idx < val->len; idx++) {
-        switch(val->buff[idx]) {
-            case ' ':
-                if (separator) {
-                    val->buff[idx] = '\0';
-                    separator = !isSingle;
-                }
-                val->probs[curr] = val->buff + idx + 1;
-                break;
-            case '\n':
-                val->buff[idx] = '\0';
-                curr++;
-                if (curr < val->size) {
-                    val->labels[curr] = val->buff + idx + 1;
-                    separator = true;
-                }
-                break;
+        int idx = 0;
+        for (const auto& value : ngramVectors) {
+            retj[idx]["word"] = value.first;
+            for (int64_t _idx = 0; _idx < value.second.size(); _idx++) {
+                retj[idx]["vector"][_idx] = value.second[_idx];
+            }
+            idx++;
         }
-    } // for (size_t idx=0; idx < len; idx++)
-
-    return val;
-}
-
-/**
- * set error message
- *
- * @access private
- * @param  const char* error
- * @return FTProbs
- */
-FTProbs _errorProbs(const char *error)
-{
-    FTProbs val = new struct _FTProbs;
-    val->is_error = FASTTEXT_TRUE;
-    val->len = strlen(error);
-    val->buff = new char[val->len + 1];
-    strcpy(val->buff, error);
-
-    val->probs = nullptr;
-    val->labels = nullptr;
-
-    return val;
-}
-
-/**
- * create struct FTKeyValues
- *
- * @access private
- * @param  int64_t size
- * @return FTKeyValues
- */
-FTKeyValues _setKeyValues(std::vector<std::pair<fasttext::real, std::string>> &values)
-{
-    FTKeyValues val = new struct _FTKeyValues;
-    val->is_error = FASTTEXT_FALSE;
-    val->len = 0;
-    val->buff = nullptr;
-
-    val->size = static_cast<int>(values.size());
-    val->labels = new char*[val->size];
-    val->vals = new FTReal[val->size];
-
-    int idx=0;
-    for (auto &value : values) {
-        val->labels[idx] = new char[value.second.length() + 1];
-        val->vals[idx] = std::exp(value.first);
-        strcpy(val->labels[idx], value.second.c_str());
-        idx++;
+    } catch (const std::invalid_argument& e) {
+        retj["is_error"] = FASTTEXT_TRUE;
+        retj["error"] = e.what();
     }
 
-    return val;
-}
-
-/**
- * set error message
- *
- * @access private
- * @param  const char* error
- * @return FTVectors
- */
-FTKeyValues _errorKeyValues(const char *error)
-{
-    FTKeyValues val = new struct _FTKeyValues;
-    val->is_error = FASTTEXT_TRUE;
-    val->len = strlen(error);
-    val->buff = new char[val->len + 1];
-    strcpy(val->buff, error);
-
-    val->vals = nullptr;
-
-    return val;
+    return FTStrVal(retj.dump());
 }
 
 /**

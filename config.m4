@@ -40,7 +40,7 @@ if test "$PHP_FASTTEXT" != "no"; then
   PHP_ADD_LIBRARY(stdc++, 1, FASTTEXT_SHARED_LIBADD)
   PHP_ADD_LIBRARY(fasttext, 1, FASTTEXT_SHARED_LIBADD)
   CFLAGS="-O3 -funroll-loops"
-  CXXFLAGS="-pthread -std=c99 -std=gnu99 -std=c++11 -O3 -funroll-loops"
+  CXXFLAGS="-pthread -std=c++11 -funroll-loops -O3 -march=native"
 
   PHP_NEW_EXTENSION(fasttext, fasttext_api.cc fasttext.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi

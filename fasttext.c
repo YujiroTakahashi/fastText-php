@@ -5,9 +5,9 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/json/php_json.h"
 #include "php_fasttext.h"
 #include "main/SAPI.h"
-
 
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
@@ -28,42 +28,6 @@ static zend_object_handlers fasttext_object_handlers;
 /* Class entries */
 zend_class_entry *php_fasttext_sc_entry;
 
-
-static void fasttext_vec_add_array(zval *retval, int idx, FTReal val) /* {{{ */
-{
-	zval tmp;
-	zend_string *str = zend_strpprintf(0, "%f", val);
-	ZVAL_STR(&tmp, str);
-	add_index_zval(retval, idx, &tmp);
-}
-/* }}} */
-
-static void fasttext_value_add_array(zval *retval, int idx, const char *label, const char *prob) /* {{{ */
-{
-	zval tmp;
-
-	array_init(&tmp);
-	add_assoc_string(&tmp, "label", (char *)label);
-	add_assoc_string(&tmp, "prob", (char *)prob);
-
-	add_index_zval(retval, idx, &tmp);
-}
-/* }}} */
-
-static void fasttext_key_value_add_array(zval *retval, int idx, const char *label, FTReal val) /* {{{ */
-{
-	zval tmp;
-	zend_string *str = zend_strpprintf(0, "%f", val);
-
-	array_init(&tmp);
-	add_assoc_string(&tmp, "label", (char *)label);
-	add_assoc_string(&tmp, "prob", (char *)ZSTR_VAL(str));
-
-	add_index_zval(retval, idx, &tmp);
-}
-/* }}} */
-
-
 /* {{{ proto void fasttext::__construct()
  */
 PHP_METHOD(fasttext, __construct)
@@ -71,12 +35,11 @@ PHP_METHOD(fasttext, __construct)
 	php_fasttext_object *ft_obj;
 	zval *object = getThis();
 
-	ft_obj = Z_FASTTEXT_P(object);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
+	ft_obj = Z_FASTTEXT_P(object);
 	ft_obj->fasttext = FastTextCreate();
 }
 /* }}} */
@@ -91,11 +54,11 @@ PHP_METHOD(fasttext, load)
 	size_t filename_len;
 	zend_long res;
 
-	ft_obj = Z_FASTTEXT_P(object);
-
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &filename, &filename_len)) {
 		return;
 	}
+
+	ft_obj = Z_FASTTEXT_P(object);
 	res = FastTextLoadModel(ft_obj->fasttext, filename);
 
 	RETURN_LONG(res);
@@ -110,11 +73,11 @@ PHP_METHOD(fasttext, getWordRows)
 	zval *object = getThis();
 	zend_long res;
 
-	ft_obj = Z_FASTTEXT_P(object);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	ft_obj = Z_FASTTEXT_P(object);
 	res = FastTextWordRows(ft_obj->fasttext);
 
 	RETURN_LONG(res);
@@ -129,11 +92,11 @@ PHP_METHOD(fasttext, getLabelRows)
 	zval *object = getThis();
 	zend_long res;
 
-	ft_obj = Z_FASTTEXT_P(object);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	ft_obj = Z_FASTTEXT_P(object);
 	res = FastTextLabelRows(ft_obj->fasttext);
 
 	RETURN_LONG(res);
@@ -150,11 +113,11 @@ PHP_METHOD(fasttext, getWordId)
 	size_t word_len;
 	zend_long id;
 
-	ft_obj = Z_FASTTEXT_P(object);
-
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
 		return;
 	}
+
+	ft_obj = Z_FASTTEXT_P(object);
 	id = (zend_long)FastTextWordId(ft_obj->fasttext, (const char*)word);
 
 	RETURN_LONG(id);
@@ -171,11 +134,11 @@ PHP_METHOD(fasttext, getSubwordId)
 	size_t word_len;
 	zend_long id;
 
-	ft_obj = Z_FASTTEXT_P(object);
-
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
 		return;
 	}
+
+	ft_obj = Z_FASTTEXT_P(object);
 	id = (zend_long)FastTextSubwordId(ft_obj->fasttext, (const char*)word);
 
 	RETURN_LONG(id);
@@ -189,23 +152,17 @@ PHP_METHOD(fasttext, getWord)
 	php_fasttext_object *ft_obj;
 	zval *object = getThis();
 	zend_long id;
-	FTValues ft_vals;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr vals;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &id)) {
 		return;
 	}
-	ft_vals = FastTextGetWord(ft_obj->fasttext, (int32_t)id);
 
-	if (ft_vals->is_error) {
-		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextValuesFree(ft_vals);
-		RETURN_FALSE;
-	}
+	ft_obj = Z_FASTTEXT_P(object);
+	vals = FastTextGetWord(ft_obj->fasttext, (int32_t)id);
 
-	ZVAL_STRING(return_value, ft_vals->buff);
-	FastTextValuesFree(ft_vals);
+	ZVAL_STRING(return_value, vals->buff);
+	FastTextStrFree(vals);
 }
 /* }}} */
 
@@ -216,23 +173,17 @@ PHP_METHOD(fasttext, getLabel)
 	php_fasttext_object *ft_obj;
 	zval *object = getThis();
 	zend_long id;
-	FTValues ft_vals;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr vals;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &id)) {
 		return;
 	}
-	ft_vals = FastTextGetLabel(ft_obj->fasttext, (int32_t)id);
 
-	if (ft_vals->is_error) {
-		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextValuesFree(ft_vals);
-		RETURN_FALSE;
-	}
+	ft_obj = Z_FASTTEXT_P(object);
+	vals = FastTextGetLabel(ft_obj->fasttext, (int32_t)id);
 
-	ZVAL_STRING(return_value, ft_vals->buff);
-	FastTextValuesFree(ft_vals);
+	ZVAL_STRING(return_value, vals->buff);
+	FastTextStrFree(vals);
 }
 /* }}} */
 
@@ -244,20 +195,18 @@ PHP_METHOD(fasttext, getWordVectors)
 	zval *object = getThis();
 	char *word;
 	size_t word_len;
-	FTVectors ft_vecs;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
 		return;
 	}
-	ft_vecs = FastTextWordVectors(ft_obj->fasttext, (const char*)word);
+
+	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextWordVectors(ft_obj->fasttext, (const char*)word);
 
 	array_init(return_value);
-	for (int64_t idx=0; idx<ft_vecs->size; idx++) {
-		fasttext_vec_add_array(return_value, (int)idx, ft_vecs->vals[idx]);
-	}
-	FastTextVectorsFree(ft_vecs);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -269,20 +218,18 @@ PHP_METHOD(fasttext, getSubwordVector)
 	zval *object = getThis();
 	char *word;
 	size_t word_len;
-	FTVectors ft_vecs;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
 		return;
 	}
-	ft_vecs = FastTextSubwordVector(ft_obj->fasttext, (const char*)word);
+
+	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextSubwordVector(ft_obj->fasttext, (const char*)word);
 
 	array_init(return_value);
-	for (int64_t idx=0; idx<ft_vecs->size; idx++) {
-		fasttext_vec_add_array(return_value, (int)idx, ft_vecs->vals[idx]);
-	}
-	FastTextVectorsFree(ft_vecs);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -294,20 +241,18 @@ PHP_METHOD(fasttext, getSentenceVectors)
 	zval *object = getThis();
 	char *sentence;
 	size_t sentence_len;
-	FTVectors ft_vecs;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &sentence, &sentence_len)) {
 		return;
 	}
-	ft_vecs = FastTextSubwordVector(ft_obj->fasttext, (const char*)sentence);
+
+	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextSubwordVector(ft_obj->fasttext, (const char*)sentence);
 
 	array_init(return_value);
-	for (int64_t idx=0; idx<ft_vecs->size; idx++) {
-		fasttext_vec_add_array(return_value, (int)idx, ft_vecs->vals[idx]);
-	}
-	FastTextVectorsFree(ft_vecs);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -320,26 +265,18 @@ PHP_METHOD(fasttext, getPredict)
 	char *word;
 	size_t word_len;
 	zend_long k = 10;
-	FTKeyValues ft_vals;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
 		return;
 	}
-	ft_vals = FastTextPredict(ft_obj->fasttext, (const char*)word, (const int)k);
 
-	if (ft_vals->is_error) {
-		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextKeyValuesFree(ft_vals);
-		RETURN_FALSE;
-	}
+	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextPredict(ft_obj->fasttext, (const char*)word, (const int)k);
 
 	array_init(return_value);
-	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_key_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->vals[idx]);
-	}
-	FastTextKeyValuesFree(ft_vals);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -352,26 +289,18 @@ PHP_METHOD(fasttext, getNN)
 	char *word;
 	size_t word_len;
 	zend_long k = 10;
-	FTKeyValues ft_vals;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
 		return;
 	}
-	ft_vals = FastTextNN(ft_obj->fasttext, (const char*)word, (const int)k);
 
-	if (ft_vals->is_error) {
-		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextKeyValuesFree(ft_vals);
-		RETURN_FALSE;
-	}
+	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextNN(ft_obj->fasttext, (const char*)word, (const int)k);
 
 	array_init(return_value);
-	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_key_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->vals[idx]);
-	}
-	FastTextKeyValuesFree(ft_vals);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -384,26 +313,18 @@ PHP_METHOD(fasttext, getAnalogies)
 	char *word;
 	size_t word_len;
 	zend_long k = 10;
-	FTKeyValues ft_vals;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
 		return;
 	}
-	ft_vals = FastTextAnalogies(ft_obj->fasttext, (const char*)word, (const int)k);
 
-	if (ft_vals->is_error) {
-		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextKeyValuesFree(ft_vals);
-		RETURN_FALSE;
-	}
+	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextAnalogies(ft_obj->fasttext, (const char*)word, (const int)k);
 
 	array_init(return_value);
-	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_key_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->vals[idx]);
-	}
-	FastTextKeyValuesFree(ft_vals);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -415,42 +336,18 @@ PHP_METHOD(fasttext, getNgramVectors)
 	zval *object = getThis();
 	char *word;
 	size_t word_len;
-	FTProbs ft_vals;
-
-	ft_obj = Z_FASTTEXT_P(object);
+	FTStr json;
 
 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
 		return;
 	}
-	ft_vals = FastTextNgramVectors(ft_obj->fasttext, (const char*)word);
-
-	if (ft_vals->is_error) {
-		ZVAL_STRING(&ft_obj->error, ft_vals->buff);
-		FastTextProbsFree(ft_vals);
-		RETURN_FALSE;
-	}
-
-	array_init(return_value);
-	for (int idx=0; idx<ft_vals->size; idx++) {
-		fasttext_value_add_array(return_value, idx, ft_vals->labels[idx], ft_vals->probs[idx]);
-	}
-	FastTextProbsFree(ft_vals);
-}
-/* }}} */
-
-/* {{{ proto string fasttext::lastErrorMsg()
- */
-PHP_METHOD(fasttext, lastErrorMsg)
-{
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
 
 	ft_obj = Z_FASTTEXT_P(object);
+	json = FastTextNgramVectors(ft_obj->fasttext, (const char*)word);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	RETURN_ZVAL(&ft_obj->error, 1, 0);
+	array_init(return_value);
+	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+	FastTextStrFree(json);
 }
 /* }}} */
 
@@ -494,7 +391,6 @@ static zend_function_entry php_fasttext_class_methods[] = {
 	PHP_ME(fasttext, getNN,				arginfo_fasttext_wordk, ZEND_ACC_PUBLIC)
 	PHP_ME(fasttext, getAnalogies, 		arginfo_fasttext_wordk, ZEND_ACC_PUBLIC)
 	PHP_ME(fasttext, getNgramVectors,	arginfo_fasttext_word,	ZEND_ACC_PUBLIC)
-	PHP_ME(fasttext, lastErrorMsg,		arginfo_fasttext_void,	ZEND_ACC_PUBLIC)
 
 	PHP_FE_END
 };
