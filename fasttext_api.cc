@@ -328,25 +328,16 @@ FTStr FastTextNN(FastTextHandle handle, const char* word, const int k)
     FastText *fasttext = static_cast<FastText*>(handle);
     std::shared_ptr<const Dictionary> dict = fasttext->getDictionary();
 
-    std::string text = std::string(word);
 
-    Vector queryVec(fasttext->getDimension());
-    Matrix wordVectors(dict->nwords(), fasttext->getDimension());
-
-    fasttext->precomputeWordVectors(wordVectors);
-
-    std::set<std::string> banSet;
-    banSet.clear();
-    banSet.insert(text);
-    fasttext->getWordVector(queryVec, text);
-
-    nlohmann::json retj;
+    std::string query = std::string(word);
     std::vector<std::pair<fasttext::real, std::string>> results;
+    nlohmann::json retj;
+
     try {
-        fasttext->findNN(wordVectors, queryVec, k, banSet, results);
+        results = fasttext->getNN(query, k);
         int idx = 0;
         for (auto &value : results) {
-            retj[idx]["prob"] = std::exp(value.first);
+            retj[idx]["prob"] = value.first;
             retj[idx]["label"] = value.second;
             idx++;
         }
@@ -397,7 +388,7 @@ FTStr FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
         fasttext->findNN(wordVectors, query, k, banSet, results);
         int idx = 0;
         for (auto &value : results) {
-            retj[idx]["prob"] = std::exp(value.first);
+            retj[idx]["prob"] = value.first;
             retj[idx]["label"] = value.second;
             idx++;
         }
