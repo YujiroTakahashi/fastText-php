@@ -407,7 +407,7 @@ FTStr FastTextAnalogies(FastTextHandle handle, const char* word, const int k)
  * @param  const char* word
  * @return FTStr
  */
-FTStr FastTextNgramVectors(FastTextHandle handle, const char* word)
+FTStr FastTextNgrams(FastTextHandle handle, const char* word)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::vector<std::pair<std::string, Vector>> ngramVectors;

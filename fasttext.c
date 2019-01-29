@@ -343,7 +343,7 @@ PHP_METHOD(fasttext, getNgramVectors)
 	}
 
 	ft_obj = Z_FASTTEXT_P(object);
-	json = FastTextNgramVectors(ft_obj->fasttext, (const char*)word);
+	json = FastTextNgrams(ft_obj->fasttext, (const char*)word);
 
 	array_init(return_value);
 	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);

@@ -64,11 +64,12 @@ FASTTEXT_API FTStr FastTextGetLabel(FastTextHandle handle, const int32_t labelId
 
 FASTTEXT_API FTStr FastTextPredict(FastTextHandle handle, const char* word, const int32_t k);
 FASTTEXT_API FTStr FastTextWordVectors(FastTextHandle handle, const char* word);
+FASTTEXT_API FTStr FastTextSubwordVector(FastTextHandle handle, const char* word);
 FASTTEXT_API FTStr FastTextSentenceVectors(FastTextHandle handle, const char* word);
 FASTTEXT_API FTStr FastTextNgrams(FastTextHandle handle, const char* word);
 FASTTEXT_API FTStr FastTextNN(FastTextHandle handle, const char* word, const int32_t k);
 FASTTEXT_API FTStr FastTextAnalogies(FastTextHandle handle, const char* word, const int32_t k);
-FASTTEXT_API FTStr FastTextDump(FastTextHandle handle, const char* word, const char* option);
+// FASTTEXT_API FTStr FastTextDump(FastTextHandle handle, const char* word, const char* option);
 
 #ifdef __cplusplus
 }
