@@ -248,7 +248,7 @@ PHP_METHOD(fasttext, getSentenceVectors)
 	}
 
 	ft_obj = Z_FASTTEXT_P(object);
-	json = FastTextSubwordVector(ft_obj->fasttext, (const char*)sentence);
+	json = FastTextSentenceVectors(ft_obj->fasttext, (const char*)sentence);
 
 	array_init(return_value);
 	php_json_decode(return_value, json->buff, json->len, 1, PHP_JSON_PARSER_DEFAULT_DEPTH);

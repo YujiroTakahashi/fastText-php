@@ -258,7 +258,9 @@ FTStr FastTextWordVectors(FastTextHandle handle, const char* word)
 
     nlohmann::json retj;
     for (int64_t idx = 0; idx < vec.size(); idx++) {
-        retj[idx] = vec[idx];
+        std::stringstream wvec("");
+        wvec << vec[idx];
+        retj[idx] = wvec.str();
     }
 
     return FTStrVal(retj.dump());
@@ -282,7 +284,9 @@ FTStr FastTextSubwordVector(FastTextHandle handle, const char* word)
 
     nlohmann::json retj;
     for (int64_t idx = 0; idx < vec.size(); idx++) {
-        retj[idx] = vec[idx];
+        std::stringstream svec("");
+        svec << vec[idx];
+        retj[idx] = svec.str();
     }
 
     return FTStrVal(retj.dump());
@@ -300,15 +304,16 @@ FTStr FastTextSentenceVectors(FastTextHandle handle, const char* word)
 {
     FastText *fasttext = static_cast<FastText*>(handle);
     std::string text = std::string(word);
-    std::stringstream ioss;
-    std::copy(text.begin(), text.end(), std::ostream_iterator<char>(ioss));
+    std::stringstream ioss(word);
 
     Vector vec(fasttext->getDimension());
     fasttext->getSentenceVector(ioss, vec);
 
     nlohmann::json retj;
     for (int64_t idx = 0; idx < vec.size(); idx++) {
-        retj[idx] = vec[idx];
+        std::stringstream svec("");
+        svec << vec[idx];
+        retj[idx] = svec.str();
     }
 
     return FTStrVal(retj.dump());
