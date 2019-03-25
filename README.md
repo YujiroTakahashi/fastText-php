@@ -10,10 +10,11 @@ PHP 7.x
 fastText shard object  
 
 ```
-$ git clone https://github.com/facebookresearch/fastText.git
-$ cd fastText
-$ mkdir build && cd build && cmake ..
-$ make
+$ curl -fSL "https://github.com/facebookresearch/fastText/archive/0.2.0.tar.gz" -o "./fastText-0.2.0.tgz"
+$ tar xf fastText-0.2.0.tgz
+$ cd fastText-0.2.0
+$ mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
+$ make -j $(nproc)
 $ sudo make install
 ```
 
@@ -23,7 +24,7 @@ $ sudo make install
 $ cd fastText-php
 $ phpize
 $ ./configure
-$ make
+$ make -j $(nproc)
 $ sudo make install
 ```
 
