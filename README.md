@@ -10,9 +10,9 @@ PHP 7.x
 fastText shard object  
 
 ```
-$ curl -fSL "https://github.com/facebookresearch/fastText/archive/0.2.0.tar.gz" -o "./fastText-0.2.0.tgz"
-$ tar xf fastText-0.2.0.tgz
-$ cd fastText-0.2.0
+$ curl -fSL "https://github.com/facebookresearch/fastText/archive/v0.9.1.tar.gz" -o "./fastText-0.9.1.tgz"
+$ tar xf fastText-0.9.1.tgz
+$ cd fastText-0.9.1
 $ mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
 $ make -j $(nproc)
 $ sudo make install
