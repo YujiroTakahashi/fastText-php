@@ -4,19 +4,19 @@
  */
 PHP_METHOD(fasttext, __construct)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *address;
-	size_t address_len;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *address;
+    size_t address_len;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
 
-	ft_obj = Z_FASTTEXT_P(object);
+    ft_obj = Z_FASTTEXT_P(object);
 
     croco::CFastText *fasttext = new croco::CFastText();
-	ft_obj->handle = static_cast<FastTextHandle>(fasttext);
+    ft_obj->handle = static_cast<FastTextHandle>(fasttext);
 }
 /* }}} */
 
@@ -24,17 +24,17 @@ PHP_METHOD(fasttext, __construct)
  */
 PHP_METHOD(fasttext, __destruct)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
 
-	ft_obj = Z_FASTTEXT_P(object);
+    ft_obj = Z_FASTTEXT_P(object);
 
     croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-	delete fasttext;
+    delete fasttext;
 }
 /* }}} */
 
@@ -42,16 +42,16 @@ PHP_METHOD(fasttext, __destruct)
  */
 PHP_METHOD(fasttext, getError)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
 
-	ft_obj = Z_FASTTEXT_P(object);
+    ft_obj = Z_FASTTEXT_P(object);
 
-	RETURN_ZVAL(&ft_obj->error, 1, 0);
+    RETURN_ZVAL(&ft_obj->error, 1, 0);
 }
 /* }}} */
 
@@ -59,26 +59,26 @@ PHP_METHOD(fasttext, getError)
  */
 PHP_METHOD(fasttext, load)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *model;
-	size_t model_len;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *model;
+    size_t model_len;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &model, &model_len)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	try {
- 		fasttext->loadModel(std::string(model));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &model, &model_len)) {
+        return;
     }
 
-	RETURN_TRUE;
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    try {
+         fasttext->loadModel(std::string(model));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    RETURN_TRUE;
 }
 /* }}} */
 
@@ -86,26 +86,26 @@ PHP_METHOD(fasttext, load)
  */
 PHP_METHOD(fasttext, getWordRows)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	zend_long rows;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    zend_long rows;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	try {
-		std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
-		rows = dict->nwords();
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
     }
 
-	RETURN_LONG(rows);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    try {
+        std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
+        rows = dict->nwords();
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    RETURN_LONG(rows);
 }
 /* }}} */
 
@@ -113,26 +113,26 @@ PHP_METHOD(fasttext, getWordRows)
  */
 PHP_METHOD(fasttext, getLabelRows)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	zend_long rows;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    zend_long rows;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	try {
-		std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
-		rows = dict->nlabels();
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
     }
 
-	RETURN_LONG(rows);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    try {
+        std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
+        rows = dict->nlabels();
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    RETURN_LONG(rows);
 }
 /* }}} */
 
@@ -140,27 +140,27 @@ PHP_METHOD(fasttext, getLabelRows)
  */
 PHP_METHOD(fasttext, getWordId)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
-	zend_long id;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
+    zend_long id;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	try {
-		id = fasttext->getWordId(std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
+        return;
     }
 
-	RETURN_LONG(id);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    try {
+        id = fasttext->getWordId(std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    RETURN_LONG(id);
 }
 /* }}} */
 
@@ -168,27 +168,27 @@ PHP_METHOD(fasttext, getWordId)
  */
 PHP_METHOD(fasttext, getSubwordId)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
-	zend_long id;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
+    zend_long id;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	try {
-		id = fasttext->getSubwordId(std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
+        return;
     }
 
-	RETURN_LONG(id);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    try {
+        id = fasttext->getSubwordId(std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    RETURN_LONG(id);
 }
 /* }}} */
 
@@ -196,24 +196,24 @@ PHP_METHOD(fasttext, getSubwordId)
  */
 PHP_METHOD(fasttext, getWord)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	zend_long id;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    zend_long id;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &id)) {
-		return;
-	}
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &id)) {
+        return;
+    }
 
-	ft_obj = Z_FASTTEXT_P(object);
+    ft_obj = Z_FASTTEXT_P(object);
     croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
 
-	try {
-		std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
-		std::string word = dict->getWord(id);
-		ZVAL_STRING(return_value, word.c_str());
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    try {
+        std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
+        std::string word = dict->getWord(id);
+        ZVAL_STRING(return_value, word.c_str());
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
     }
 }
 /* }}} */
@@ -222,24 +222,24 @@ PHP_METHOD(fasttext, getWord)
  */
 PHP_METHOD(fasttext, getLabel)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	zend_long id;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    zend_long id;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &id)) {
-		return;
-	}
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &id)) {
+        return;
+    }
 
-	ft_obj = Z_FASTTEXT_P(object);
+    ft_obj = Z_FASTTEXT_P(object);
     croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
 
-	try {
-		std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
-		std::string label = dict->getLabel(id);
-		ZVAL_STRING(return_value, label.c_str());
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    try {
+        std::shared_ptr<const fasttext::Dictionary> dict = fasttext->getDictionary();
+        std::string label = dict->getLabel(id);
+        ZVAL_STRING(return_value, label.c_str());
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
     }
 }
 /* }}} */
@@ -248,27 +248,27 @@ PHP_METHOD(fasttext, getLabel)
  */
 PHP_METHOD(fasttext, getWordVectors)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	fasttext::Vector vec(fasttext->getDimension());
-	try {
-		fasttext->getWordVector(vec, std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
+        return;
     }
 
-	array_init(return_value);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    fasttext::Vector vec(fasttext->getDimension());
+    try {
+        fasttext->getWordVector(vec, std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    array_init(return_value);
     for (int64_t idx = 0; idx < vec.size(); idx++) {
         std::stringstream svec("");
         svec << vec[idx];
@@ -284,27 +284,27 @@ PHP_METHOD(fasttext, getWordVectors)
  */
 PHP_METHOD(fasttext, getSubwordVector)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	fasttext::Vector vec(fasttext->getDimension());
-	try {
-		fasttext->getSubwordVector(vec, std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
+        return;
     }
 
-	array_init(return_value);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    fasttext::Vector vec(fasttext->getDimension());
+    try {
+        fasttext->getSubwordVector(vec, std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    array_init(return_value);
     for (int64_t idx = 0; idx < vec.size(); idx++) {
         std::stringstream svec("");
         svec << vec[idx];
@@ -320,30 +320,30 @@ PHP_METHOD(fasttext, getSubwordVector)
  */
 PHP_METHOD(fasttext, getSentenceVectors)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *sentence;
-	size_t sentence_len;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *sentence;
+    size_t sentence_len;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &sentence, &sentence_len)) {
-		return;
-	}
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &sentence, &sentence_len)) {
+        return;
+    }
 
-	ft_obj = Z_FASTTEXT_P(object);
+    ft_obj = Z_FASTTEXT_P(object);
     croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
 
     std::stringbuf strBuf(sentence);
     std::istream istream(&strBuf); 
-	fasttext::Vector vec(fasttext->getDimension());
+    fasttext::Vector vec(fasttext->getDimension());
 
-	try {
-		fasttext->getSentenceVector(istream, vec);
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    try {
+        fasttext->getSentenceVector(istream, vec);
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
     }
 
-	array_init(return_value);
+    array_init(return_value);
     for (int64_t idx = 0; idx < vec.size(); idx++) {
         std::stringstream svec("");
         svec << vec[idx];
@@ -359,31 +359,31 @@ PHP_METHOD(fasttext, getSentenceVectors)
  */
 PHP_METHOD(fasttext, getPredict)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
-	zend_long k = 0;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
+    zend_long k = 0;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	std::vector<std::pair<fasttext::real, std::string>> result;
-	try {
-		if (0 >= k) {
-			k = fasttext->getK();
-		}
-		result = fasttext->getPredict(k, std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
+        return;
     }
 
-	array_init(return_value);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    std::vector<std::pair<fasttext::real, std::string>> result;
+    try {
+        if (0 >= k) {
+            k = fasttext->getK();
+        }
+        result = fasttext->getPredict(k, std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    array_init(return_value);
     zend_ulong idx = 0;
     for (auto &node : result) {
         zval rowVal, probVal, labelVal;
@@ -403,37 +403,37 @@ PHP_METHOD(fasttext, getPredict)
  */
 PHP_METHOD(fasttext, getNgrams)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	std::vector<std::pair<std::string, fasttext::Vector>> result;
-	try {
-		result = fasttext->getNgramVectors(std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &word, &word_len)) {
+        return;
     }
 
-	array_init(return_value);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    std::vector<std::pair<std::string, fasttext::Vector>> result;
+    try {
+        result = fasttext->getNgramVectors(std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    array_init(return_value);
     zend_ulong idx = 0;
     for (auto &node : result) {
         zval rowVal, vecsVal, vecVal, wordVal;
 
         array_init(&vecsVal);
-		for (int64_t vidx = 0; vidx < node.second.size(); vidx++) {
+        for (int64_t vidx = 0; vidx < node.second.size(); vidx++) {
             zval vecVal;
             ZVAL_DOUBLE(&vecVal, node.second[vidx]);
             add_index_zval(&vecsVal, vidx, &vecVal);
-		}
+        }
         ZVAL_STRING(&wordVal, node.first.c_str());
 
         array_init(&rowVal);
@@ -451,31 +451,31 @@ PHP_METHOD(fasttext, getNgrams)
  */
 PHP_METHOD(fasttext, getNN)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
-	zend_long k = 0;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
+    zend_long k = 0;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	std::vector<std::pair<fasttext::real, std::string>> result;
-	try {
-		if (0 >= k) {
-			k = fasttext->getK();
-		}
-		result = fasttext->getNN(std::string(word), k);
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
+        return;
     }
 
-	array_init(return_value);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    std::vector<std::pair<fasttext::real, std::string>> result;
+    try {
+        if (0 >= k) {
+            k = fasttext->getK();
+        }
+        result = fasttext->getNN(std::string(word), k);
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    array_init(return_value);
     zend_ulong idx = 0;
     for (auto &node : result) {
         zval rowVal, scoreVal, labelVal;
@@ -496,32 +496,32 @@ PHP_METHOD(fasttext, getNN)
  */
 PHP_METHOD(fasttext, getAnalogies)
 {
-	php_fasttext_object *ft_obj;
-	zval *object = getThis();
-	char *word;
-	size_t word_len;
-	zend_long k = 0;
+    php_fasttext_object *ft_obj;
+    zval *object = getThis();
+    char *word;
+    size_t word_len;
+    zend_long k = 0;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
-		return;
-	}
-
-	ft_obj = Z_FASTTEXT_P(object);
-    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
-
-	std::vector<std::pair<fasttext::real, std::string>> result;
-	try {
-		if (0 >= k) {
-			k = fasttext->getK();
-		}
-
-		result = fasttext->getAnalogies(k, std::string(word));
-	} catch (std::exception& e) {
-		ZVAL_STRING(&ft_obj->error, e.what());
-		RETURN_FALSE;
+    if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|l", &word, &word_len, &k)) {
+        return;
     }
 
-	array_init(return_value);
+    ft_obj = Z_FASTTEXT_P(object);
+    croco::CFastText *fasttext = static_cast<croco::CFastText*>(ft_obj->handle);
+
+    std::vector<std::pair<fasttext::real, std::string>> result;
+    try {
+        if (0 >= k) {
+            k = fasttext->getK();
+        }
+
+        result = fasttext->getAnalogies(k, std::string(word));
+    } catch (std::exception& e) {
+        ZVAL_STRING(&ft_obj->error, e.what());
+        RETURN_FALSE;
+    }
+
+    array_init(return_value);
     zend_ulong idx = 0;
 
     for (auto &node : result) {
