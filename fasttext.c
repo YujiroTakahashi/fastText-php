@@ -57,7 +57,7 @@ ZEND_END_ARG_INFO()
 /* {{{ php_sfasttext_class_methods */
 static zend_function_entry php_fasttext_class_methods[] = {
 	PHP_ME(fasttext, __construct,       arginfo_fasttext_void,  ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
-	PHP_ME(fasttext, __destruct,        arginfo_fasttext_void,  ZEND_ACC_PUBLIC|ZEND_ACC_DTOR)
+	PHP_ME(fasttext, __destruct,        arginfo_fasttext_void,  ZEND_ACC_PUBLIC)
 	PHP_ME(fasttext, getError,          arginfo_fasttext_void,  ZEND_ACC_PUBLIC)
 	PHP_ME(fasttext, load,              arginfo_fasttext_load,  ZEND_ACC_PUBLIC)
 	PHP_ME(fasttext, getWordRows,       arginfo_fasttext_void,  ZEND_ACC_PUBLIC)
